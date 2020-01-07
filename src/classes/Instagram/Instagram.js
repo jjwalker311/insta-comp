@@ -1,3 +1,12 @@
+  /**
+   * Validates a given hashtag, throws Error if invalid
+   * @param  {string} hashtag
+   */
+  function validateHashtag(hashtag) {
+    if (!hashtag) throw new Error('Please enter a valid hash tag');
+    if (hashtag.includes('#')) throw new Error('Please don\'t include "#" in argument');
+  }
+
 class Instagram {
   /**
    * Initialises Instagram Web API library
@@ -17,6 +26,32 @@ class Instagram {
    */
   login() {
     return this.client.login();
+  }
+
+  /**
+   * Calls logout functionality
+   * @returns {Promise}
+   */
+  logout() {
+    return this.client.logout();
+  }
+
+  /**
+   * Returns trend data for a given hashtag
+   * DON'T add a "#" to arg!!!
+   * @param  {string} hashtag
+   * @returns {Promise}
+   */
+  hashtagTrend(hashtag) {
+    validateHashtag(hashtag);
+
+    return this.client.getMediaFeedByHashtag({ hashtag });
+  }
+
+  search(hashtag) {
+    validateHashtag(hashtag);
+
+    return this.client.getPhotosByHashtag({ hashtag });
   }
 
   /**
