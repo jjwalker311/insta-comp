@@ -1,0 +1,7 @@
+{
+  "name": "insta-comp",
+  "version": "1.0.0",
+  "description": "Instagram competition helper",
+  "main": "index.js",
+  "license": "MIT"
+}
