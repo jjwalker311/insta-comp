@@ -2,7 +2,10 @@ const {
   SELECTOR,
   METHOD,
   DELAY,
+  COPY,
 } = require('../../constants');
+
+const getAttributeFromDomElement = require('../../helper/getAttributeFromDomElement');
 
 class Puppet {
   constructor(username, password, page) {
@@ -48,6 +51,23 @@ class Puppet {
     await this.page.waitFor(DELAY.DEFAULT);
 
     return this.page.click(selector);
+  }
+
+  /**
+   * Clicks a post based on href
+   * @param  {String} href
+   * @returns {Promise}
+   */
+  async clickPost(href) {
+    return this.click(`a[href="${href}"]`);
+  }
+
+  /**
+   * Clicks background to close post
+   * @returns {Promise}
+   */
+  async closePost() {
+    return this.click(SELECTOR[METHOD.POST].CLOSE);
   }
 
   /**
@@ -131,7 +151,87 @@ class Puppet {
       this.page.waitFor(DELAY.SEARCH),
     ]);
   }
-}
 
+  /**
+   * Get all results for given query
+   * @param  {string} selector
+   * @return {Promise}
+   */
+  async getAllPosts() {
+    await this.page.waitForSelector(SELECTOR[METHOD.SEARCH].POSTS);
+
+    const posts = await this.page.$$(SELECTOR[METHOD.SEARCH].POSTS);
+    const propertyJsHandles = await Promise.all(
+      posts.map((post) => post.getProperty('href')),
+    );
+    return Promise.all(
+      propertyJsHandles.map((post) => post.jsonValue()),
+    );
+  }
+
+  /**
+   * Waits for a period of time (ms)
+   * @param  {number} duration
+   * @returns {Promise}
+   */
+  async wait(duration) {
+    return this.page.waitFor(duration);
+  }
+
+  /**
+   * Returns innerText from post description
+   * @returns {Promise}
+   */
+  async getPostDescription() {
+    await this.page.waitForSelector(SELECTOR[METHOD.POST].DESCRIPTION);
+    const description = await this.page.$(SELECTOR[METHOD.POST].DESCRIPTION);
+
+    return getAttributeFromDomElement(description, 'innerText');
+  }
+
+  /**
+   * Follows user (if not already following them)
+   * @returns {Promise}
+   */
+  async followUser() {
+    await this.page.waitForSelector(SELECTOR[METHOD.POST].FOLLOW);
+    const followButton = await this.page.$(SELECTOR[METHOD.POST].FOLLOW);
+    const followButtonLabel = await getAttributeFromDomElement(followButton, 'innerText');
+
+    // Checking if we're already following them
+    if (followButtonLabel === COPY.FOLLOWING) return null;
+
+    return this.click(SELECTOR[METHOD.POST].FOLLOW);
+  }
+
+  /**
+   * Likes a post (if not liked already)
+   * @returns {Promise}
+   */
+  async likePost() {
+    const likeButtonExists = !!(await this.page.$(SELECTOR[METHOD.POST].LIKE));
+
+    if (likeButtonExists) {
+      return this.click(SELECTOR[METHOD.POST].LIKE);
+    }
+
+    return null;
+  }
+
+  /**
+   * Adds comment to a post
+   * @param  {string} comment
+   * @param {Promise}
+   */
+  async commentOnPost(comment) {
+    if (!comment) throw new Error('Please enter a valid comment!!');
+
+    // Type in comment
+    await this.type(SELECTOR[METHOD.POST].COMMENT, comment);
+
+    // Post comment
+    return this.click(SELECTOR[METHOD.POST].POST);
+  }
+}
 
 module.exports = Puppet;

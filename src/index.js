@@ -17,6 +17,26 @@ const { INSTAGRAM_USERNAME, INSTAGRAM_PASSWORD, PUPPETEER_HEADLESS } = process.e
   await puppet.clearPopups();
   await puppet.search('#competition');
 
+  const posts = await puppet.getAllPosts();
+  const hrefs = posts.map((href) => href.replace(URL.INSTAGRAM, ''));
+
+  await puppet.clickPost(hrefs[0]);
+
+  await puppet.wait(4000);
+
+  const description = await puppet.getPostDescription();
+  console.log(description);
+
+
+  await puppet.closePost();
+
+  // await puppet.followUser();
+  // await puppet.likePost();
+
+  // await puppet.commentOnPost('Amy and Sheldon');
+
+  await puppet.wait(4000);
+
   await browser.close();
 })();
 
@@ -24,18 +44,18 @@ const { INSTAGRAM_USERNAME, INSTAGRAM_PASSWORD, PUPPETEER_HEADLESS } = process.e
 /**
  * TODO: LIST
  * Login - ✅
- * Search of hashtag
- * Click on image
- * Get description
+ * Search of hashtag - ✅
+ * Click on image - ✅
+ * Get description - ✅
  * Determine if UK
  * Determine if competition
  * Determine what we need to do
  * Determine if has entered already
- * Like photo
- * Follow user
- * Tag a friend
- * Leave a comment
- * Close image to page behind
+ * Like photo - ✅
+ * Follow user - ✅
+ * Tag a friend 
+ * Leave a comment - ✅
+ * Close image to page behind - ✅
  * Scroll to more images
  * Do the above on the next batch
  */
